@@ -25,7 +25,7 @@ class add_block(APIView):
             data=request.data
         )
         if block_srl.is_valid():
-            block:Block = block_srl.save()
+            block = block_srl.save()
             block = block.to_dict()
             return Response(data={'OK':True, 'message':'Block added successfully.', 'block':block}, status=200)
         return Response(data={'OK':False, 'message': block_srl.errors}, status=400)

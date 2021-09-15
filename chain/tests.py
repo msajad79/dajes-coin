@@ -1,4 +1,4 @@
-from inspect import trace
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from .models import Block, Transaction
@@ -78,7 +78,7 @@ class TestViewAddBlock(TestCase):
             "prev_block":"",
             "transactions":[1,2,3],
             "timestamp":"2000-01-01T20:20",
-            "difficulty":10,
+            "difficulty":1,
             "nonce":1
         }
         res = self.client.post("/chain/add_block/", data=data)
@@ -95,7 +95,7 @@ class TestViewAddBlock(TestCase):
             "prev_block":"1",
             "transactions":[4],
             "timestamp":"2000-01-01T20:30",
-            "difficulty":10,
+            "difficulty":1,
             "nonce":10
         }
         res = self.client.post("/chain/add_block/", data=data)
@@ -112,9 +112,9 @@ class TestViewAddBlock(TestCase):
     def false_second_transaction_add_block(self):
         pass
 
-    def test_init_block_true_1(self):
+    def test_add_block_true_1(self):
         self.true_init_add_block()
-        self.true_second_add_block
+        self.true_second_add_block()
         
     def test_init_block_false_1(self):
         data = {
@@ -122,7 +122,7 @@ class TestViewAddBlock(TestCase):
             "prev_block":"1",
             "transactions":[1,2,3],
             "timestamp":"2000-01-01T20:20",
-            "difficulty":10,
+            "difficulty":1,
             "nonce":1
         }
         res = self.client.post("/chain/add_block/", data=data)
@@ -139,7 +139,7 @@ class TestViewAddBlock(TestCase):
             "prev_block":"1",
             "transactions":[1],
             "timestamp":"2000-01-01T20:30",
-            "difficulty":10,
+            "difficulty":1,
             "nonce":10
         }
         res = self.client.post("/chain/add_block/", data=data)
