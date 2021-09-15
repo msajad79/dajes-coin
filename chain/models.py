@@ -2,11 +2,13 @@ from itertools import chain
 
 from django.db import models
 from django.forms.models import model_to_dict
-from django.db.models.base import Model
+
+from . import validators_block as block_val
+from . import validators_trx as trx_val
 
 class Transaction(models.Model):
-    sender = models.CharField(max_length=64)
-    receiver = models.CharField(max_length=64)
+    sender = models.CharField(max_length=64, validators=[trx_val.validate_sender])
+    receiver = models.CharField(max_length=64, validators=[trx_val.validate_receiver])
     timestamp = models.DateTimeField()
     value = models.FloatField()
 
@@ -16,13 +18,19 @@ class Transaction(models.Model):
         return True
 
 class Block(models.Model):
-    hash_block = models.CharField(max_length=256)
-    prev_block = models.OneToOneField("Block", on_delete=models.PROTECT, null=True, blank=True)
+    hash_block = models.CharField(max_length=256, validators=[block_val.validate_hash_block])
+    prev_block = models.OneToOneField(
+        "Block",
+        on_delete=models.PROTECT,
+        validators=[block_val.validate_prev_block],
+        null=True,
+        blank=True
+    )
     transactions = models.ManyToManyField("Transaction", related_name="block_transactions")
-    timestamp = models.DateTimeField()
-    difficulty = models.FloatField()
-    nonce = models.IntegerField()    
-    
+    timestamp = models.DateTimeField(validators=[block_val.validate_timestamp])
+    difficulty = models.PositiveIntegerField(validators=[block_val.validate_difficulty])
+    nonce = models.IntegerField()
+
     def to_dict(instance):
         opts = instance._meta
         data = {}
@@ -31,3 +39,19 @@ class Block(models.Model):
         for f in opts.many_to_many:
             data[f.name] = [model_to_dict(i) for i in f.value_from_object(instance)]
         return data
+    
+    @staticmethod
+    def get_difficulty():
+        blocks = Block.objects.all().order_by('-id')[:5]
+        avg = blocks.aggregate(models.Avg('difficulty'))
+        avg = avg['difficulty__avg']
+        if avg is None:
+            return 1
+        diff_time = (blocks[len(blocks)-1].timestamp - blocks[0].timestamp).total_seconds()
+        try:
+            avg = int(avg * ((60*len(blocks))/diff_time))
+        except ZeroDivisionError:
+            avg = int(avg)
+        if avg == 0:
+            return 1
+        return avg
