@@ -8,8 +8,11 @@ Someone who tries to find a hash that is less than difficulty level by changing 
 The minimum number of zeros at the beginning of a hash block for a block to be accepted as a mined block.
 
 # TODO
-- [x] Define the concept of miner
-- [x] Define the concept of difficulty level
-- [ ] Validation of block hash block
-- [ ] Validation of block transactions
-- [ ] Validation of block difficulty level
+- [x] Chain app
+    - [x] Define the concept of miner
+    - [x] Define the concept of difficulty level
+    - [x] Validation of block hash block
+    - [x] Validation of block transactions
+    - [x] Validation of block difficulty level
+- [ ] Node app
+    - [ ] Manager for start node
